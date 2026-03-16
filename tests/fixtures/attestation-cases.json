@@ -1,0 +1,212 @@
+[
+  {
+    "description": "human commit, no PR",
+    "signals": {"is_ai": false, "pr": null},
+    "expected_attestation": {"kind": "all-human"}
+  },
+  {
+    "description": "human commit with PR and reviews",
+    "signals": {
+      "is_ai": false,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "all-human"}
+  },
+  {
+    "description": "single human approval at HEAD",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "attested"}
+  },
+  {
+    "description": "two human approvers, last at HEAD",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "def456",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "aaa111"},
+          {"state": "APPROVED", "author_type": "User", "author_login": "bob", "commit_id": "def456"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "attested"}
+  },
+  {
+    "description": "human approval + bot comment",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"},
+          {"state": "COMMENTED", "author_type": "Bot", "author_login": "codecov", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "attested"}
+  },
+  {
+    "description": "re-approval after push (same author, new SHA)",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "def456",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "aaa111"},
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "def456"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "attested"}
+  },
+  {
+    "description": "no PR — direct push",
+    "signals": {"is_ai": true, "pr": null},
+    "expected_attestation": {"kind": "unattested", "reason": "no-pr"}
+  },
+  {
+    "description": "PR, no reviews",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": []
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "no-reviews"}
+  },
+  {
+    "description": "approval then commits pushed",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "def456",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "aaa111"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "approved-then-modified"}
+  },
+  {
+    "description": "human comment only",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "COMMENTED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "human-commented"}
+  },
+  {
+    "description": "human changes-requested only",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "CHANGES_REQUESTED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "human-commented"}
+  },
+  {
+    "description": "human comment + bot approval",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "COMMENTED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"},
+          {"state": "APPROVED", "author_type": "Bot", "author_login": "codecov", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "human-commented"}
+  },
+  {
+    "description": "dismissed approval (APPROVED then DISMISSED, same author)",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"},
+          {"state": "DISMISSED", "author_type": "User", "author_login": "alice", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "human-commented"}
+  },
+  {
+    "description": "bot approval only",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "Bot", "author_login": "codecov", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "ai-reviewed-only"}
+  },
+  {
+    "description": "bot comment only",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "COMMENTED", "author_type": "Bot", "author_login": "codecov", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "ai-reviewed-only"}
+  },
+  {
+    "description": "multiple bots, no human",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "abc123",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "Bot", "author_login": "codecov", "commit_id": "abc123"},
+          {"state": "COMMENTED", "author_type": "Bot", "author_login": "dependabot", "commit_id": "abc123"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "ai-reviewed-only"}
+  },
+  {
+    "description": "human approved old SHA + different human commented",
+    "signals": {
+      "is_ai": true,
+      "pr": {
+        "head_sha_at_merge": "def456",
+        "reviews": [
+          {"state": "APPROVED", "author_type": "User", "author_login": "alice", "commit_id": "aaa111"},
+          {"state": "COMMENTED", "author_type": "User", "author_login": "bob", "commit_id": "def456"}
+        ]
+      }
+    },
+    "expected_attestation": {"kind": "unattested", "reason": "approved-then-modified"}
+  }
+]
