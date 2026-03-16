@@ -142,7 +142,7 @@ async function generate(args: string[]): Promise<number> {
     const attPayload = buildAttestationPayload(
       isAi,
       pulls.map(p => ({ number: p.number, merge_commit_sha: p.merge_commit_sha ?? null, head: { sha: p.head.sha } })),
-      reviews.map(r => ({ state: r.state, user: r.user ? { login: r.user.login, type: r.user.type ?? "User" } : null, commit_id: r.commit_id })),
+      reviews.map(r => ({ state: r.state, user: r.user ? { login: r.user.login, type: r.user.type ?? "User" } : null, commit_id: r.commit_id ?? "" })),
     );
     const attestation = classifyAttestation(attPayload);
 
