@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.key
+*.pem
+# dist-action/ is committed — single ncc bundle for the GitHub Action
