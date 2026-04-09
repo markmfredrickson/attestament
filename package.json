@@ -4,14 +4,40 @@
   "description": "Verify that AI-authored code was human-attested before it shipped",
   "type": "module",
   "license": "MIT",
+  "author": "Mark Fredrickson <mark.m.fredrickson@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markmfredrickson/attestament.git"
+  },
+  "homepage": "https://github.com/markmfredrickson/attestament#readme",
+  "bugs": {
+    "url": "https://github.com/markmfredrickson/attestament/issues"
+  },
+  "keywords": [
+    "ai",
+    "attestation",
+    "code-review",
+    "governance",
+    "ed25519",
+    "mcp",
+    "trust",
+    "provenance"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "attestament": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
+    "build:action": "ncc build dist/action.js -o dist-action --source-map",
+    "build:all": "npm run build && npm run build:action",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -20,7 +46,9 @@
     "@octokit/rest": "^21.0.0"
   },
   "devDependencies": {
+    "@actions/core": "^1.11.1",
     "@types/node": "^25.5.0",
+    "@vercel/ncc": "^0.38.4",
     "typescript": "^5.7",
     "vitest": "^3.0"
   }

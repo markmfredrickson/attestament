@@ -74,9 +74,23 @@ async function generate(args: string[]): Promise<number> {
   const { aggregateStats } = await import("./badge/stats.js");
   const { makeBadge } = await import("./badge/badge.js");
 
+  const parts = values.repo.split("/");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    console.error("Error: --repo must be in owner/repo format (e.g. markmfredrickson/attestament)");
+    return 1;
+  }
+  const [owner, repo] = parts;
+
   const octokit = new Octokit({ auth: token });
-  const [owner, repo] = values.repo.split("/");
-  const branch = values.branch ?? (await octokit.repos.get({ owner, repo })).data.default_branch;
+
+  let branch: string;
+  try {
+    branch = values.branch ?? (await octokit.repos.get({ owner, repo })).data.default_branch;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Error: could not access ${values.repo} — ${msg}`);
+    return 1;
+  }
 
   // Check eligibility
   let protection;

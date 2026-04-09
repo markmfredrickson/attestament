@@ -1,0 +1,45 @@
+name: "Attestament"
+description: "Verify that AI-authored code was human-attested. Generates a signed trust badge for your repo."
+author: "Mark Fredrickson"
+
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  repo:
+    description: "Repository in owner/repo format (default: current repo)"
+    required: false
+  branch:
+    description: "Branch to audit (default: current branch)"
+    required: false
+  signing-key:
+    description: "Ed25519 private key (PEM). Store as a GitHub secret."
+    required: true
+  since:
+    description: "Stop walking at this commit SHA"
+    required: false
+  fail-on-unattested:
+    description: "Fail the workflow if any AI commits are unattested (default: true)"
+    required: false
+    default: "true"
+  badge-path:
+    description: "Directory to write badge.json, badge.sig, and shield.json (default: .attestament)"
+    required: false
+    default: ".attestament"
+
+outputs:
+  status:
+    description: "Badge status: 'attested', 'partial', 'all-human', or 'unattested'"
+  ai-commits:
+    description: "Number of AI-authored commits found"
+  human-reviewed:
+    description: "Number of AI commits with human attestation"
+  total-commits:
+    description: "Total commits audited"
+  badge-url:
+    description: "Shields.io badge URL"
+
+runs:
+  using: "node20"
+  main: "dist-action/index.js"
